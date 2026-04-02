@@ -26,7 +26,8 @@ RUN yum install -y \
     ntsysv vsftpd cronolog \
     libjpeg-devel libpng-devel freetype-devel gd-devel libtermcap-devel ncurses-devel libxml2-devel libc-client-devel bzip2-devel libmcrypt libmcrypt-devel libmhash libmhash-devel libtool-ltdl-devel \
     net-snmp-utils mrtg \
-    gcc make automake autoconf libtool wget tar openssl-dev mod_ssl mod_security \
+    gcc gcc-c++ make automake autoconf libtool wget tar openssl-dev mod_ssl mod_security \
+    cmake \
     && yum clean all
 
 # Compiling twemproxy (nutcracker) v0.4.1
@@ -81,6 +82,42 @@ RUN wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/
 
 # Note: libjpeg-turbo (already installed) provides JPEG optimization
 # Similar to mozjpeg with faster performance and better compatibility
+
+# Install libheif and dependencies from source
+WORKDIR /tmp
+
+# 1. Install libde265 (dependency for libheif)
+RUN wget https://github.com/strukturag/libde265/releases/download/v1.0.8/libde265-1.0.8.tar.gz && \
+    tar xzf libde265-1.0.8.tar.gz && \
+    cd libde265-1.0.8 && \
+    ./configure --prefix=/usr/local && \
+    make && \
+    make install && \
+    cd /tmp && \
+    rm -rf libde265-* && \
+    ldconfig
+
+# 2. Install x265 (dependency for libheif)
+RUN wget https://github.com/videolan/x265/archive/refs/tags/3.4.tar.gz -O x265-3.4.tar.gz && \
+    tar xzf x265-3.4.tar.gz && \
+    cd x265-3.4/build/linux && \
+    cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr/local ../../source && \
+    make && \
+    make install && \
+    cd /tmp && \
+    rm -rf x265-* && \
+    ldconfig
+
+# 3. Install libheif
+RUN wget https://github.com/strukturag/libheif/releases/download/v1.12.0/libheif-1.12.0.tar.gz && \
+    tar xzf libheif-1.12.0.tar.gz && \
+    cd libheif-1.12.0 && \
+    ./configure --prefix=/usr/local --disable-go && \
+    make && \
+    make install && \
+    cd /tmp && \
+    rm -rf libheif-* && \
+    ldconfig
 
 # Install encrypt module (encryption key support for PHP)
 COPY down/encrypt_so/encrypt_so/encrypt_keys_php /tmp/encrypt_keys_php
