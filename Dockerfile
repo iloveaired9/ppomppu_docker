@@ -79,6 +79,9 @@ RUN wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/
     cp libwebp-1.3.2-linux-x86-64/bin/* /usr/local/bin/ && \
     rm -rf libwebp-1.3.2-linux-x86-64*
 
+# Note: libjpeg-turbo (already installed) provides JPEG optimization
+# Similar to mozjpeg with faster performance and better compatibility
+
 # Copy entrypoint script
 COPY scripts/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
