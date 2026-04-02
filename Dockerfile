@@ -71,12 +71,8 @@ RUN mkdir -p /home/webadmin/ppomppu \
     chown -R web_user:web_user /home/webadmin/logs /home/logs/apache /home/session && \
     chmod 755 /home/webadmin
 
-# Install libheif, libwebp (as specified in doc)
-RUN wget https://download1.rpmfusion.org/free/el/updates/7/x86_64/l/libde265-1.0.2-6.el7.x86_64.rpm --no-check-certificate || true && \
-    wget https://download1.rpmfusion.org/free/el/updates/7/x86_64/x/x265-libs-2.9-3.el7.x86_64.rpm --no-check-certificate || true && \
-    wget https://rpms.remirepo.net/enterprise/7/remi/x86_64/libheif-1.4.0-1.el7.remi.x86_64.rpm --no-check-certificate || true && \
-    yum localinstall -y libde265-*.rpm x265-libs-*.rpm libheif-*.rpm || true && \
-    rm -f *.rpm
+# Note: libheif requires libde265 and x265-libs which are not available in CentOS 7 repos
+# Using libwebp for image format support instead
 
 RUN wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-linux-x86-64.tar.gz && \
     tar -xvf libwebp-1.3.2-linux-x86-64.tar.gz && \
