@@ -226,6 +226,7 @@ docker run -d -p 80:80 -p 443:443 --name ppomppu ppomppu:latest
 | **libheif** | 1.12.0 | ✅ |
 | **x265** | 3.4 | ✅ |
 | **libde265** | 1.0.8 | ✅ |
+| **FFmpeg** | 4.4.2 | ✅ |
 | **encrypt_keys_php** | Custom | ✅ |
 | **Memcache** | PHP Module | ✅ |
 | **MySQL Support** | PHP Module | ✅ |

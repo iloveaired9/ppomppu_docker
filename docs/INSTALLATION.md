@@ -66,6 +66,7 @@ curl http://localhost
 | **libheif** | 1.12.0 | HEIF/HEIC 이미지 포맷 지원 |
 | **x265** | 3.4 | HEVC/H.265 비디오 인코더 |
 | **libde265** | 1.0.8 | HEVC 비디오 디코더 |
+| **FFmpeg** | 4.4.2 | 멀티미디어 처리 및 변환 |
 | **GD Library** | - | 이미지 생성/조작 |
 
 ### PHP 확장 모듈

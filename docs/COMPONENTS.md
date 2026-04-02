@@ -322,6 +322,44 @@ x265 input.yuv -o output.h265 -q 28
 
 ---
 
+## 🎬 멀티미디어 처리
+
+### FFmpeg 4.4.2
+
+**설명**: 비디오/오디오 인코딩, 디코딩, 스트리밍 도구
+
+```bash
+# 실행 경로
+/usr/local/sbin/ffmpeg
+
+# 버전 확인
+docker exec ppomppu /usr/local/sbin/ffmpeg -version
+
+# 지원 코덱 확인
+docker exec ppomppu /usr/local/sbin/ffmpeg -codecs | head -30
+```
+
+**포함된 기능**:
+- 비디오 인코딩/디코딩
+- 오디오 처리
+- 형식 변환 (MP4, WebM, MKV 등)
+- 스트림 처리
+- GPL 코덱 지원
+
+**사용 예**:
+```bash
+# 비디오 형식 변환
+ffmpeg -i input.mp4 -c:v libx264 output.mp4
+
+# 영상 추출
+ffmpeg -i video.mp4 -vf fps=1 frame_%04d.jpg
+
+# 오디오 추출
+ffmpeg -i video.mp4 -q:a 0 -map a audio.mp3
+```
+
+---
+
 ## 🔐 암호화 모듈
 
 ### mcrypt (PHP 내장)
@@ -499,6 +537,12 @@ Apache 2.4.6
 Nutcracker 0.4.1
   └── [Redis 클러스터 관리]
 
+FFmpeg 4.4.2
+  ├── libx265 (HEVC 인코딩)
+  ├── libvpx (VP8/VP9)
+  ├── libwebp (WebP)
+  └── ... [GPL 코덱]
+
 GD Library
   ├── libpng
   ├── libjpeg-turbo
@@ -510,7 +554,8 @@ GD Library
   ├── libheif 1.12.0 (HEIF/HEIC)
   │   ├── x265 3.4 (HEVC 인코더)
   │   └── libde265 1.0.8 (HEVC 디코더)
-  └── libwebp 1.3.2 (WebP)
+  ├── libwebp 1.3.2 (WebP)
+  └── FFmpeg 4.4.2 (멀티미디어 변환)
 ```
 
 ---

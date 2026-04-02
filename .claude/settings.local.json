@@ -16,7 +16,12 @@
       "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test netstat -tlnp)",
       "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test ss -tlnp)",
       "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test bash -c 'echo \"\"<?php phpinfo\\(\\); ?>\"\" > /var/www/html/info.php')",
-      "Bash(curl -s http://localhost/info.php)"
+      "Bash(curl -s http://localhost/info.php)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" rm -f ppomppu_test)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test bash -c \":*)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test php -v)",
+      "WebSearch",
+      "Bash(powershell -Command \"docker build -t ppomppu:latest . 2>&1\")"
     ]
   }
 }

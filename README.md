@@ -14,7 +14,7 @@ CentOS 7 기반 완전한 PHP 5.5 웹 개발 환경을 Docker로 제공합니다
 - ✅ **PHP 5.5.38** - 안정적인 PHP 런타임 (30+ 확장 모듈)
 - ✅ **Nutcracker** - Redis 프록시 및 캐시 관리
 - ✅ **암호화 모듈** - AES-128 (encrypt_keys_php)
-- ✅ **멀티미디어 처리** - libwebp 1.3.2, libjpeg-turbo 1.2.90, libheif 1.12.0, x265 3.4
+- ✅ **멀티미디어 처리** - FFmpeg 4.4.2, libwebp 1.3.2, libjpeg-turbo 1.2.90, libheif 1.12.0, x265 3.4, libde265 1.0.8
 - ✅ **데이터베이스** - MySQL, SQLite, PDO 지원
 - ✅ **캐싱** - Redis, Memcache, opcache
 - ✅ **비동기 작업** - Gearman job server
@@ -76,9 +76,10 @@ docker exec ppomppu php -v
 | Memcache | 메모리 캐시 | ✅ (ext) |
 | MySQL/PDO | 데이터베이스 | ✅ (ext) |
 
-### 이미지 & 영상 & 암호화
+### 멀티미디어 & 암호화
 | 라이브러리 | 버전 | 상태 |
 |-----------|------|------|
+| **FFmpeg** | **4.4.2** | **✅** |
 | libwebp | 1.3.2 | ✅ |
 | libjpeg-turbo | 1.2.90 | ✅ |
 | **libheif** | **1.12.0** | **✅** |

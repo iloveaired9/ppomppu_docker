@@ -81,9 +81,9 @@ RUN wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/
     rm -rf libwebp-1.3.2-linux-x86-64*
 
 # Note: libjpeg-turbo (already installed) provides JPEG optimization
-# Similar to mozjpeg with faster performance and better compatibility
+# libjpeg-turbo 1.2.90 provides high-speed JPEG compression (2-6x faster than standard libjpeg)
 
-# Install libheif and dependencies from source
+# Install libheif and dependencies from source (BEFORE FFmpeg, since FFmpeg needs these libraries)
 WORKDIR /tmp
 
 # 1. Install libde265 (dependency for libheif)
@@ -117,6 +117,27 @@ RUN wget https://github.com/strukturag/libheif/releases/download/v1.12.0/libheif
     make install && \
     cd /tmp && \
     rm -rf libheif-* && \
+    ldconfig
+
+# Install FFmpeg with multimedia support (after x265, libwebp, and libde265)
+WORKDIR /tmp
+RUN yum install -y \
+    nasm yasm \
+    librtmp-devel libtheora-devel libvorbis-devel libvpx-devel \
+    speex-devel && \
+    wget https://ffmpeg.org/releases/ffmpeg-4.4.2.tar.gz && \
+    tar xzf ffmpeg-4.4.2.tar.gz && \
+    cd ffmpeg-4.4.2 && \
+    export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH && \
+    ldconfig && \
+    ./configure \
+        --prefix=/usr/local \
+        --bindir=/usr/local/sbin \
+        --enable-gpl && \
+    make && \
+    make install && \
+    cd /tmp && \
+    rm -rf ffmpeg-4.4.2* && \
     ldconfig
 
 # Install encrypt module (encryption key support for PHP)
