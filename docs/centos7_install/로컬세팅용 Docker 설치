@@ -1,0 +1,59 @@
+1. 이미지 로딩
+#로컬 관리자 로그인
+su
+ 
+#기존 docker 전부 스톱 (나오는 리스트 전부 stop 및 삭제)
+[root@localhost] docker ps -a
+
+#이미지 다운로드 (암호는 실서버 webadmin 암호)
+[root@localhost] scp -r dev@192.168.63.107:~/docker/* ./
+ 
+#이미지 로딩
+[root@localhost] docker load < proxy/proxy.tar
+[root@localhost] docker load < ppomppu/ppomppu.tar
+[root@localhost] docker load < strongman/strongman.tar
+2. docker-compose.yml 수정
+version: '2.2'
+
+services:
+    proxy:
+        build: ./proxy
+        image: proxy:latest
+        container_name: proxy
+        privileged: true
+        tty: true
+        volumes:
+            - /sys/fs/cgroup:/sys/fs/cgroup:ro
+            - [로컬소스경로]:/home/webadmin
+        command: nginx -g 'daemon off;'
+        networks:
+            default:
+                ipv4_address: 192.168.80.[로컬IP뒷자리]
+        ports:
+            - "80:80"
+            - "443:443"
+    ppomppu:
+        build: ./ppomppu
+        image: ppomppu:latest
+        container_name: ppomppu
+        privileged: true
+        tty: true
+        volumes:
+            - /sys/fs/cgroup:/sys/fs/cgroup:ro
+            - [로컬소스경로]:/home/webadmin
+        command: /bin/bash -c '/home/bin/start.sh && /bin/bash'
+        networks:
+            default:
+                ipv4_address: 192.168.80.2
+
+
+networks:
+    default:
+        ipam:
+            driver: default
+            config:
+                - subnet: 192.168.80.0/24
+3. 컨테이너 생성
+[root@localhost] docker-compose up -d proxy
+[root@localhost] docker-compose up -d ppomppu
+[root@localhost] docker-compose up -d strongman

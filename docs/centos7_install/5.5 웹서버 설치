@@ -1,0 +1,568 @@
+리눅스 설치 & 네트워크 스크립트 세팅 2시간
+
+방화벽 30분
+
+php설치 ~ php.ini 수정까지 2시간
+
+
+
+httpd.conf 설정 , mod_security 설치 7시간
+
+
+
+마운트 & 문인 2시간
+
+
+
+
+
+1.php 설치 (5.5) & 아파치 설치(httpd)
+
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+yum install yum-utils
+
+yum-config-manager --enable remi-php55
+
+yum update
+
+yum install ntsysv httpd httpd-devel php php-devel vsftpd* mbstring libjpeg-devel libpng-devel freetype-devel gd-devel libtermcap-devel ncurses-devel libxml2-devel libc-client-devel bzip2-devel libmcrypt libmcrypt-devel libmhash libmhash-devel libtool-ltdl-devel vsftpd vsftpd-devel mrtg* net-snmp* php-mysql php-mcrypt 
+yum -y install php php-pear php-mbstring php-mysql php-gd php-devel php-c
+yum install ld-linux.so.2
+yum install -y cronolog.x86_64
+
+
+$ php -v
+
+Php 버전확인 (5.5)
+
+
+
+1.5.아파치 설정(worker)
+
+vi /etc/httpd/conf.modules.d/00-mpm.conf
+ 
+#---------------------------------------------------------------
+...
+#LoadModule mpm_prefork_module modules/mod_mpm_prefork.so <<-------주석처리
+...
+LoadModule mpm_prefork_module modules/mod_mpm_worker.so <<-------주석풀어서 적용
+...
+#맨하단 내용추가 worker module 설정
+<IfModule mpm_worker_module>
+ServerLimit 80
+StartServers 20
+MaxRequestWorkers 2000
+MinSpareThreads 25
+MaxSpareThreads 75
+ThreadsPerChild 25
+</IfModule>
+#---------------------------------------------------------------
+ 
+ 
+vi /usr/lib/systemd/system/httpd.service
+ 
+PrivateTmp=false #수정
+
+
+2.레디스 설치
+
+# yum install -y php-redis
+
+해당하는 php버전의 redis도 설치
+
+Ex php 5.5 일 경우
+
+# yum install -y php55-php-pecl-redis.x86_64
+
+
+
+3.멤케시 설치
+
+# yum search memcached
+
+#yum install php55-php-pecl-memcache
+
+#yum install php55-php-pecl-memcached
+
+#yum install php-pecl-memcached
+
+#yum install php-pecl-memcache
+
+
+
+/etc/php.d/z-memcached.ini  수정 (memcached.serializer = php)
+
+/etc/php-zts.d/z-memcached.ini 수정 (memcached.serializer = php)
+
+
+
+
+
+기어멘 설치
+
+#yum install -y php55-php-pecl-gearman 
+
+#yum install -y php-pecl-gearman
+
+
+
+옵케쉬 설치
+
+#yum install -y php55-php-opcache
+
+#yum install -y php-pecl-zendopcache
+
+
+
+4.nutcracker 설치
+
+
+
+
+
+wget https://github.com/twitter/twemproxy/archive/v0.4.1.tar.gz
+tar xvfz v0.4.1.tar.gz 
+cd twemproxy-0.4.1
+autoreconf -fvi
+./configure 
+make 
+cp src/nutcracker /usr/sbin 
+mkdir /etc/nutcracker 
+cp conf/nutcracker.leaf.yml /etc/nutcracker/nutcracker.yml     #<<-- 해당 파일은 샘플파일로 실제 맞는 설정을 가져와 넣어준다
+cp scripts/nutcracker.init /etc/init.d/nutcracker 
+chmod 755 /etc/init.d/nutcracker 
+ 
+mkdir /home/logs/nutcracker
+ 
+ 
+[root@web55 twemproxy-0.4.1]# vi /usr/lib/systemd/system/nutcracker.service
+#-------------------------------------------------------------------------------------------------------------------------------
+[Unit]
+Description=Nutcracker (twemproxy) redis connection proxy
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/nutcracker -d -c /etc/nutcracker/nutcracker.yml -o /home/logs/nutcracker/nutcracker.log -p /var/run/nutcracker.pid
+User=root
+Group=root
+PIDFile=/var/run/nutcracker.pid
+
+[Install]
+WantedBy=multi-user.target
+#-------------------------------------------------------------------------------------------------------------------------------
+ 
+ 
+#twemproxy start
+systemctl enable nutcracker
+systemctl start nutcarcker
+
+
+
+
+5. php.ini 수정  (동일 버전의 웹장비가 있다면 카피 해서 사용)
+
+short_open_tag = On
+
+error_reporting = E_ALL & ~E_NOTICE & ~E_DEPRECATED
+
+expose_php = Off
+
+display_errors = On (검수할때만)
+
+auto_prepend_file = /home/webadmin/php_include/pre_lib.php
+
+default_charset = "euc-kr"
+
+date.timezone = Asia/Seoul
+
+serialize_precision = 100 수정
+
+upload_max_filesize = 21M 수정
+
+post_max_size = 21M
+
+
+
+[mail function] 영역에서 추가
+
+SMTP = localhost
+smtp_port = 25
+
+
+
+[Session] 영역에서 추가
+
+session.save_path = "/home/session"
+
+
+
+[gd]
+
+gd.jpeg_ignore_warning = 1
+
+
+
+[soap]
+soap.wsdl_cache_enabled=0
+
+
+
+/etc/http/conf.d/php.conf 의 맨 아랫줄에 아래 내용 주석처리해주세요.
+
+(php_value 3개 기본값. 이는 php.ini설정에서 다루고있음. 의미없는 중복 설정)
+
+#
+# Apache specific PHP configuration options
+# those can be override in each configured vhost
+#
+#php_value session.save_handler "files"
+#php_value session.save_path    "/var/lib/php/session"
+#php_value soap.wsdl_cache_dir  "/var/lib/php/wsdlcache"
+
+
+
+6. mod_security & mod_ssl 설치
+
+
+
+
+
+yum install mod_security
+yum install mod_ssl openssl
+ 
+mkdir /etc/httpd/modsecurity.d/owasp-modsecurity
+cp -rf /home/backup_point/setup_library/owasp-modsecurity-crs-3.3-dev/* /etc/httpd/modsecurity.d/owasp-modsecurity/
+cp /etc/httpd/modsecurity.d/owasp-modsecurity/crs-setup.conf.example /etc/httpd/modsecurity.d/owasp-modsecurity/crs-setup.conf
+ 
+ 
+#아래 내용 추가
+vi /etc/httpd/conf.d/mod_security.conf
+#-------------------------------------------------------------------------------------------
+        IncludeOptional modsecurity.d/owasp-modsecurity/*.conf
+        IncludeOptional modsecurity.d/owasp-modsecurity/rules/*.conf
+#-------------------------------------------------------------------------------------------
+ 
+ 
+
+
+
+
+7./etc/httpd/conf/httpd.conf 수정  ( 같은 버전의 conf 파일이 다른 웹장비에 있다면 복사해서 사용 없으면 수정&추가 )
+
+cd /etc/httpd/conf.d
+mv welcome.conf welcome.conf.bak
+mv userdir.conf userdir.conf.bak 
+mv mrtg.conf mrtg.conf.bak
+ 
+mkdir /home/logs/apache
+mkdir /home/logs/apache/access
+mkdir /home/logs/apache/error
+mkdir /home/logs/apache/mod_security
+ 
+ 
+ 
+#apache (httpd.conf) 파일 추가 및 수정
+#------------------------------------------------------------------
+ServerTokens Prod
+User web_user #수정
+Group web_user #수정
+ServerAdmin ppom-dev@googlegroups.com #수정
+ServerName www.ppomppu.co.kr #수정
+DocumentRoot "/home/webadmin/ppomppu" #수정
+DirectoryIndex index.html index.php #수정
+ErrorLog "| /usr/sbin/cronolog /home/logs/apache/error/error_log.%Y%m%d.webXX" #수정 (맨뒤 webXX는 아이피 뒷자리가 11인경우 web11 형태로 셋팅하면됨)
+LogLevel error #수정
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined #수정
+    LogFormat "%{X-Forwarded-For}i %h %{Host}i %u %t \"%r\" %>s %b %{Referer}i \"%{User-Agent}i\"" common #수정
+    #CustomLog "logs/access_log" combined #수정 <- 주석처리함
+ 
+##<IfModule mime_module> 안에 추가
+    AddType application/x-httpd-php .php .htm .html .inc
+    AddType application/x-httpd-php-source .phps
+    AddType application/x-x509-ca-cert .crt
+    AddType application/x-pkcs7-crl    .crl
+ 
+    AddHandler type-map var #수정
+#------------------------------------------------------------------
+ 
+
+
+
+
+7-1. httpd config 복사
+
+
+
+!!!주의사항
+
+각 서버끼리 ssh접근이 안되도록 막아놓아서 해당 개발자 PC나 NAS를 이용해 가져왔다가 다시 옮기는 형태로 진행해야함, 압축해서 옮기면 편함 (옮기고 로그설정 명칭 꼭 수정할것!)
+
+아래 복사파일 참고
+
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/directory.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/files.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/http.ppomppu.co.kr.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/http.ppomppu1.co.kr.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/https.ppomppu.co.kr.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/https.ppomppu1.co.kr.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/httpd-config.conf /etc/httpd/conf.d/
+ 
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/httpd-vhosts.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/mod_expires.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/mod_security.conf /etc/httpd/conf.d/
+ 
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/ssl.ppomppu.co.kr.inc /etc/httpd/conf.d/
+scp -P 2994 webadmin@192.168.0.55:/etc/httpd/conf.d/ssl.ppomppu1.co.kr.inc /etc/httpd/conf.d/
+ 
+ 
+ 
+cd /etc/httpd/conf.d
+모든 로그설정 webXX ->> webYY으로 변경 (로그설정 부분에 web55이면 아이피 뒷자리(예를들어 77)로 변경해야하면 web77으로 변경
+
+
+8. 디렉토리 생성
+
+
+#공통
+mkdir /home/webadmin/DB
+ 
+#web
+mkdir /home/webadmin/ppomppu
+mkdir /home/webadmin/aws
+mkdir /home/webadmin/batch
+mkdir /home/webadmin/batch_foreach
+mkdir /home/webadmin/common
+mkdir /home/webadmin/config
+mkdir /home/webadmin/link
+mkdir /home/webadmin/memo
+mkdir /home/webadmin/mobile
+mkdir /home/webadmin/php_include
+mkdir /home/webadmin/srv_common
+mkdir /home/webadmin/ssl
+mkdir /home/webadmin/static
+mkdir /home/webadmin/templates
+mkdir /home/webadmin/logs
+
+#img
+mkdir /home/webadmin/ppomppu
+mkdir /home/webadmin/ssl
+mkdir /home/webadmin/static
+
+
+ 
+#권한설정
+chown webadmin:webadmin -R /home/webadmin
+chown web_user:web_user -R /home/webadmin/logs
+chmod 755 /home/webadmin
+
+
+
+
+9. rsyncd 설치 
+
+
+
+yum install xinetd.x86_64 -y
+
+
+
+/etc/xinetd.d/rsync 다른 서버에서 카피
+
+scp -P 2994 webadmin@192.168.0.11:/etc/xinetd.d/rsync /etc/xinetd.d/rsync
+
+
+
+/etc/rsyncd.conf` 다른 서버에서 카피
+
+scp -P 2994 webadmin@192.168.0.11:/etc/rsyncd.conf /etc/rsyncd.conf
+
+
+
+ systemctl start xinetd
+
+
+
+10. firewall 설치
+
+`/etc/rc.d/rc.firewall`와 `/etc/rc.d/rc.local`,  스크립트 다른 웹 서버에서 복사.
+
+scp -P 2994 webadmin@192.168.0.23:/etc/rc.d/rc.firewall /etc/rc.d/rc.firewall
+scp -P 2994 webadmin@192.168.0.23:/etc/rc.d/rc.local /etc/rc.d/rc.local
+
+
+
+systemctl start iptables
+
+/etc/rc.d/rc.firewall
+
+
+
+
+
+11. 시작파일 복사 & 쉘파일 복사
+
+다른웹장비의 /etc/rc.local 파일 복사
+
+다른 웹장비의 /home/bin 밑에 있는 set_time , sh_mount , start.sh 복사
+
+Start.sh 수정 (/usr/local/apache2/bin/apachectl start 을 service httpd start 로 수정)
+
+
+
+24번이 아닌 웹장비에서 쉘파일 복사 (보안문제로 개발자 PC로컬로 가져왔다가 다시 복사해야함)
+
+scp -P 2994 -r webadmin@192.168.0.55:/home/webadmin/DB/  /home/webadmin/
+
+
+
+12. 24번 설정
+
+`/home/webadmin/DB` 디렉토리에 있는` rdist_*` 시리즈 파일들에 해당 ip추가 (config파일에 추가하면됨)
+
+
+
+
+
+13. munin-node
+
+#yum install -y munin-node.noarch
+
+#chkconfig --add munin-node
+
+
+
+사내 munin 서버에 `/etc/munin.conf`에 설치한 서버를 추가한다.
+
+`/etc/munin/munin-node.conf`파일에 아래 IP가 접근 가능하도록 수정한다.
+
+```
+
+
+
+allow ^127\.0\.0\.1$
+allow ^192\.168\.0\.119$
+
+allow ^192\.168\.0\.44$
+
+
+
+
+
+#cd /etc/munin/plugins  (폴더 이동)
+
+#ln -s  /usr/share/munin/plugins/apache_* .  (심볼릭 링크 생성)
+
+systemctl start munin-node
+
+systemctl enable munin-node
+
+
+
+14. 크론텝 설정
+
+
+24번이 아닌 다른 웹장비의 크론리스트를 보고
+
+새로 설치한 웹장비에 등록해준다
+
+
+
+*/10 * * * * /home/bin/set_time.sh
+#11 */4 * * * /home/webadmin/DB/rsync_nickcon
+#1 0 * * * /home/bin/cal_alarm.sh
+5 6 * * * /bin/sh /home/bin/del_logs.sh
+0 6 * * 0 find /home/webadmin/logs/* -mtime +90 | xargs rm -rf
+0 6 * * 0 find /home/webadmin/logs/ -type f \( ! -iname "login*" \) -mtime +60 | xargs rm -rf
+0 6 * * 0 find /usr/local/apache2/logs/modsec_log/* -mtime +30 | xargs rm -rf
+#/var/spool/clientmqueue del
+0 6 * * 0 /usr/bin/find /var/spool/clientmqueue -type f -mtime +7 -exec \rm -rf {} \;
+30 */1 * * * /home/webadmin/DB/setADLogs.sh
+
+
+
+18. CPClient 와 IPINClient 추가 (20150930)
+
+
+
+(1) 웹장비 11~23 / 25~34 
+
+/usr/lib64/php/modules/ 에 위치해 있는 CPClient.so (권한 755) 와 IPINClient.so 를 
+
+/usr/lib64/php-zts/modules/
+
+/usr/lib64/php/modules/
+
+이 두 경로에 복사한다 
+
+(2) /etc/php-zts.d/CPClient.ini 와 /etc/php-zts.d/IPINClient.ini 파일을 다른 웹장비에서 복사해온다. ( 관련 내용은 PHP 5.5 yum 설치시 Thread safe 문제 참고 )
+
+(3) 아파치 재시작 
+
+
+
+19. symbolic link 추가
+cd /home/webadmin/ppomppu
+
+ln -s zboard/data3/UserFiles UserFiles
+
+cd /home/webadmin/ppomppu/zboard
+
+ln -s data3/PPOM_icon PPOM_icon
+ln -s data3/PPOM_icon _PPOM_icon
+ln -s data3/nickcon fs_nickcon
+ln -s data3/icon icon
+ln -s data3/nickcon nickcon
+ln -s data3/session session
+
+
+
+위 파일들의 권한을 web_user로 해야 한다. (e.g: chown -h web_user:web_user fs_nickcon)
+
+
+20. encrypt 모듈 설치
+
+설치문서 위치 : 90. 암호화키
+
+
+
+21. 각 서버별 클릭된 광고 ad_logs 수를 합산 가능하도록 웹소스 변환 
+
+home/webadmin/batch_foreach/setADLogs_oneshot.php 를 실행하는 
+
+쉘파일 /home/webadmin/DB/setADLogs_oneshot.sh 에서 $_SERVER['argv'][1] 변수 세팅을 현재 서버로 변경해줌 
+
+예) 새로 설치된 것이 15번 서버일 때 
+
+cd /home/webadmin/batch_foreach
+/usr/local/php/bin/php ./setADLogs.php s15 2> /dev/null;
+22. libheif 설치
+wget https://download1.rpmfusion.org/free/el/updates/7/x86_64/l/libde265-1.0.2-6.el7.x86_64.rpm --no-check-certificate
+wget https://download1.rpmfusion.org/free/el/updates/7/x86_64/x/x265-libs-2.9-3.el7.x86_64.rpm --no-check-certificate
+wget https://rpms.remirepo.net/enterprise/7/remi/x86_64/libheif-1.4.0-1.el7.remi.x86_64.rpm --no-check-certificate
+
+rpm -ivh libde265-1.0.2-6.el7.x86_64.rpm
+rpm -ivh x265-libs-2.9-3.el7.x86_64.rpm
+rpm -ivh libheif-1.4.0-1.el7.remi.x86_64.rpm
+23. libwebp 설치
+wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-linux-x86-64.tar.gz
+
+tar -xvf libwebp-1.3.2-linux-x86-64.tar.gz
+cd libwebp-1.3.2-linux-x86-64
+
+# root로 작업
+cp bin/* /usr/local/bin/
+
+
+
+
+
+
+
+
+
+
+
+

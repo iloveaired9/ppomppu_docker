@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker build:*)",
+      "Bash(choco install:*)",
+      "Bash(docker --version)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" --version)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" build -t ppomppu:latest .)",
+      "Bash(export PATH=\"C:/Program Files/Docker/Docker/resources/bin:$PATH\")",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" images ppomppu)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" run -d -p 80:80 -p 443:443 --name ppomppu_test ppomppu:latest)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" logs ppomppu_test)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" ps)",
+      "Bash(curl -v http://localhost)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test ps aux)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test netstat -tlnp)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test ss -tlnp)",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" exec ppomppu_test bash -c 'echo \"\"<?php phpinfo\\(\\); ?>\"\" > /var/www/html/info.php')",
+      "Bash(curl -s http://localhost/info.php)"
+    ]
+  }
+}
