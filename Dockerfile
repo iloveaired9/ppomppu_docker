@@ -82,6 +82,17 @@ RUN wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/
 # Note: libjpeg-turbo (already installed) provides JPEG optimization
 # Similar to mozjpeg with faster performance and better compatibility
 
+# Install encrypt module (encryption key support for PHP)
+COPY down/encrypt_so/encrypt_so/encrypt_keys_php /tmp/encrypt_keys_php
+WORKDIR /tmp/encrypt_keys_php
+RUN phpize && \
+    ./configure && \
+    make && \
+    make install && \
+    echo "extension=encrypt_keys_php.so" > /etc/php.d/encrypt_keys_php.ini && \
+    phpize --clean && \
+    rm -rf include
+
 # Copy entrypoint script
 COPY scripts/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
