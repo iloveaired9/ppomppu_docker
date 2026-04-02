@@ -58,11 +58,14 @@ curl http://localhost
 | **Redis PHP Extension** | Redis 연결 (55-php-pecl-redis) |
 | **Memcache** | 캐시 메모리 (memcache, memcached) |
 
-### 이미지 처리
+### 멀티미디어 처리
 | 라이브러리 | 버전 | 설명 |
 |-----------|------|------|
 | **libwebp** | 1.3.2 | WebP 이미지 포맷 지원 |
 | **libjpeg-turbo** | 1.2.90 | JPEG 최적화 (고속 압축) |
+| **libheif** | 1.12.0 | HEIF/HEIC 이미지 포맷 지원 |
+| **x265** | 3.4 | HEVC/H.265 비디오 인코더 |
+| **libde265** | 1.0.8 | HEVC 비디오 디코더 |
 | **GD Library** | - | 이미지 생성/조작 |
 
 ### PHP 확장 모듈

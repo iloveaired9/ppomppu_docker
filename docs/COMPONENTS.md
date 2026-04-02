@@ -248,6 +248,78 @@ docker exec ppomppu php -i | grep -A 5 "GD Support"
 - WBMP
 - XBM
 
+### libheif 1.12.0
+
+**설명**: HEIF/HEIC 이미지 포맷 지원 (Apple, Google 최신 표준)
+
+```bash
+# 설치 위치
+/usr/local/lib/libheif.so.1.12.0
+/usr/local/lib/libx265.so.192 (의존성)
+
+# 포함된 유틸리티
+/usr/local/bin/heif-convert    # HEIF ↔ 다른 포맷 변환
+/usr/local/bin/heif-enc        # HEIF 인코더
+/usr/local/bin/heif-info       # HEIF 정보 조회
+/usr/local/bin/heif-thumbnailer # 썸네일 생성
+```
+
+**사용 예**:
+```bash
+# JPEG를 HEIF로 변환
+heif-convert input.jpg output.heic
+
+# HEIF 정보 확인
+heif-info image.heic
+
+# HEIF를 PNG로 변환
+heif-convert image.heic output.png
+```
+
+**특징**:
+- Apple iOS/macOS 표준 포맷
+- 높은 압축률 (JPEG 대비 50% 용량 감소)
+- 메타데이터 지원
+
+### x265 3.4
+
+**설명**: HEVC/H.265 비디오 코덱 (차세대 비디오 표준)
+
+```bash
+# 바이너리 위치
+/usr/local/bin/x265
+
+# 라이브러리
+/usr/local/lib/libx265.so.192
+```
+
+**용도**:
+- 고효율 비디오 인코딩
+- 4K 비디오 처리
+- 스트리밍 최적화
+
+**명령어**:
+```bash
+# 비디오 인코딩
+x265 input.yuv -o output.h265
+
+# 품질 설정 (0-51, 낮을수록 높은 품질)
+x265 input.yuv -o output.h265 -q 28
+```
+
+### libde265 1.0.8
+
+**설명**: HEVC/H.265 비디오 디코더
+
+```bash
+# 설치 위치
+/usr/local/lib/pkgconfig/libde265.pc
+```
+
+**역할**:
+- HEIF/HEIC 이미지 디코딩 (libheif의 의존성)
+- HEVC 비디오 재생
+
 ---
 
 ## 🔐 암호화 모듈
@@ -413,6 +485,9 @@ Apache 2.4.6
       └── PHP 5.5.38
           ├── libwebp 1.3.2
           ├── libjpeg-turbo 1.2.90
+          ├── libheif 1.12.0
+          │   ├── libde265 1.0.8
+          │   └── x265 3.4
           ├── mcrypt
           ├── encrypt_keys_php
           ├── mysqli (MySQL)
@@ -430,6 +505,12 @@ GD Library
   ├── libwebp
   ├── freetype
   └── ... [이미지 포맷 지원]
+
+멀티미디어 처리
+  ├── libheif 1.12.0 (HEIF/HEIC)
+  │   ├── x265 3.4 (HEVC 인코더)
+  │   └── libde265 1.0.8 (HEVC 디코더)
+  └── libwebp 1.3.2 (WebP)
 ```
 
 ---

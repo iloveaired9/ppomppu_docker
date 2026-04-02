@@ -223,6 +223,9 @@ docker run -d -p 80:80 -p 443:443 --name ppomppu ppomppu:latest
 | **Nutcracker (Redis Proxy)** | 0.4.1 | ✅ |
 | **libwebp** | 1.3.2 | ✅ |
 | **libjpeg-turbo** | 1.2.90 | ✅ |
+| **libheif** | 1.12.0 | ✅ |
+| **x265** | 3.4 | ✅ |
+| **libde265** | 1.0.8 | ✅ |
 | **encrypt_keys_php** | Custom | ✅ |
 | **Memcache** | PHP Module | ✅ |
 | **MySQL Support** | PHP Module | ✅ |
